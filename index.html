@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Agenda de Compromissos - Calendário</title>
+  <link rel="icon" type="image/png" href="icon.png">
+  
+  <!-- CSS Principal -->
+  <link rel="stylesheet" href="estilo.css" />
+  
+  <!-- Firebase: App, Realtime Database e Auth (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  
+  <!-- SweetAlert2 para alertas bonitos -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+  <!-- Área de Login (somente login; registro removido) -->
+  <div class="login-container" id="login-container">
+    <h2>Bem-vindo</h2>
+    <p>Entre para modificar a agenda</p>
+    <div class="form-group">
+      <input type="email" id="login-email" placeholder="Email" required>
+    </div>
+    <div class="form-group">
+      <input type="password" id="login-password" placeholder="Senha" required>
+    </div>
+    <div class="login-buttons">
+      <button id="login-btn">Entrar</button>
+    </div>
+  </div>
+
+  <!-- Conteúdo Principal -->
+  <div class="container">
+    <!-- Informações do usuário logado -->
+    <div class="user-info" id="user-info" style="display: none;">
+      <span id="user-email"></span>
+      <button id="logout-btn">Sair</button>
+    </div>
+    
+    <h1>Agenda de Compromissos</h1>
+    
+    <!-- Controles de Navegação do Calendário -->
+    <div class="calendar-nav">
+      <div class="year-nav">
+        <button id="prev-year">&laquo; Ano Anterior</button>
+        <button id="today-btn">Hoje</button>
+        <button id="next-year">Próximo Ano &raquo;</button>
+      </div>
+      <div class="month-nav">
+        <button id="prev-month">&lsaquo; Mês Anterior</button>
+        <span id="month-year"></span>
+        <button id="next-month">Próximo Mês &rsaquo;</button>
+      </div>
+    </div>
+    
+    <!-- Grade do Calendário -->
+    <div class="calendar" id="calendar">
+      <!-- A grade de dias será gerada via JavaScript -->
+    </div>
+
+    <!-- Seção de Adição de Compromissos (somente para usuários logados) -->
+    <div id="appointment-section">
+      <h2>Adicionar Compromisso</h2>
+      <form id="appointment-form">
+        <div class="form-group">
+          <input type="text" id="title" placeholder="Título" required>
+        </div>
+        <div class="form-group">
+          <input type="date" id="date" required>
+        </div>
+        <div class="form-group">
+          <input type="time" id="time" required>
+        </div>
+        <div class="form-group">
+          <textarea id="description" rows="3" placeholder="Descrição"></textarea>
+        </div>
+        <!-- Seleção de cor pré-definida (até 10 opções) -->
+        <div class="form-group">
+          <select id="color">
+            <option value="#007BFF">Azul Padrão</option>
+            <option value="#FF5733">Laranja</option>
+            <option value="#FFC300">Amarelo</option>
+            <option value="#C70039">Vermelho</option>
+            <option value="#900C3F">Roxo</option>
+            <option value="#28a745">Verde</option>
+            <option value="#17a2b8">Ciano</option>
+            <option value="#6f42c1">Violeta</option>
+            <option value="#343a40">Preto</option>
+            <option value="#fd7e14">Laranja Escuro</option>
+          </select>
+        </div>
+        <button type="submit">Adicionar Compromisso</button>
+      </form>
+    </div>
+    
+    <!-- Seção fixa para exibir os compromissos do dia selecionado -->
+    <div id="daily-appointments">
+      <h2>Compromissos do Dia</h2>
+      <ul id="daily-appointments-list"></ul>
+    </div>
+  </div>
+
+  <!-- Modal para Exibir os Compromissos de um Dia (para adição via modal) -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <span id="close-modal" class="close">&times;</span>
+      <h3>Compromissos em <span id="modal-date"></span></h3>
+      <ul id="modal-appointments"></ul>
+
+      <!-- Botão para Exibir/Esconder o Formulário de Adição dentro do Modal -->
+      <button id="modal-add-btn" class="modal-add-btn">Adicionar Compromisso neste Dia</button>
+
+      <!-- Formulário Interno do Modal (inicia oculto) -->
+      <div id="modal-appointment-form" style="display: none; margin-top: 15px;">
+        <div class="form-group">
+          <input type="text" id="modal-title" placeholder="Título" required>
+        </div>
+        <div class="form-group">
+          <input type="time" id="modal-time" required>
+        </div>
+        <div class="form-group">
+          <textarea id="modal-description" rows="2" placeholder="Descrição"></textarea>
+        </div>
+        <div class="form-group">
+          <select id="modal-color">
+            <option value="#007BFF">Azul Padrão</option>
+            <option value="#FF5733">Laranja</option>
+            <option value="#FFC300">Amarelo</option>
+            <option value="#C70039">Vermelho</option>
+            <option value="#900C3F">Roxo</option>
+            <option value="#28a745">Verde</option>
+            <option value="#17a2b8">Ciano</option>
+            <option value="#6f42c1">Violeta</option>
+            <option value="#343a40">Preto</option>
+            <option value="#fd7e14">Laranja Escuro</option>
+          </select>
+        </div>
+        <button id="modal-save-btn">Salvar Compromisso</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="firebase.js" defer type="module"></script>
+</body>
+</html>
