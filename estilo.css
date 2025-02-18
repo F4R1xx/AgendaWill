@@ -387,6 +387,98 @@ form button:hover {
     background-color: #218838;
 }
 
+/* ===== Botão de Editar ===== */
+.edit-btn {
+    background: none;
+    border: none;
+    color: #007BFF;
+    font-size: 1.2em;
+    cursor: pointer;
+    margin-left: 10px;
+    transition: color 0.2s;
+}
+
+.edit-btn:hover {
+    color: #0056b3;
+}
+
+/* ===== Botão de Deletar (Lixeira) ===== */
+.delete-btn {
+    background: none;
+    border: none;
+    color: #dc3545;
+    font-size: 1.2em;
+    cursor: pointer;
+    margin-left: 10px;
+    transition: color 0.2s;
+}
+
+.delete-btn:hover {
+    color: #a71d2a;
+}
+
+/* ===== Animação Fade Out para remoção ===== */
+.fade-out {
+    opacity: 0;
+    transition: opacity 0.5s ease-out;
+}
+
+/* ===== Estilo para a barra de busca global de compromissos ===== */
+#global-search {
+    width: 100%;
+    padding: 12px;
+    margin: 20px 0;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+#global-search:focus {
+    border-color: #007BFF;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.6);
+    outline: none;
+}
+
+/* Estilo para o card dos resultados da busca global */
+.search-result-card {
+    background: #fff;
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+}
+
+.search-result-card:hover {
+    transform: scale(1.02);
+}
+
+/* Botão "Mostrar Compromisso" */
+.show-appointment-btn {
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s;
+    margin-top: 10px;
+}
+
+.show-appointment-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Classe para destacar o dia com uma borda vermelha */
+.highlight-day {
+    border: 3px solid red !important;
+}
+
+
+
+
 /* ===== Responsividade ===== */
 @media (max-width: 768px) {
     .calendar {

@@ -1,22 +1,24 @@
 <!DOCTYPE html>
 <html lang="pt">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Agenda de Compromissos - Calendário</title>
   <link rel="icon" type="image/png" href="icon.png">
-  
+
   <!-- CSS Principal -->
   <link rel="stylesheet" href="estilo.css" />
-  
+
   <!-- Firebase: App, Realtime Database e Auth (compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-  
+
   <!-- SweetAlert2 para alertas bonitos -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
+
 <body>
   <!-- Área de Login (somente login; registro removido) -->
   <div class="login-container" id="login-container">
@@ -40,9 +42,21 @@
       <span id="user-email"></span>
       <button id="logout-btn">Sair</button>
     </div>
-    
+
+    <!-- Busca Global -->
+    <div class="search-container">
+      <input
+        type="text"
+        id="global-search"
+        placeholder="Buscar compromissos por título, data ou hora..."
+        title="Buscar compromissos"
+      />
+    </div>
+    <!-- Seção para exibir resultados da busca global -->
+    <div id="global-search-results"></div>
+
     <h1>Agenda de Compromissos</h1>
-    
+
     <!-- Controles de Navegação do Calendário -->
     <div class="calendar-nav">
       <div class="year-nav">
@@ -56,7 +70,7 @@
         <button id="next-month">Próximo Mês &rsaquo;</button>
       </div>
     </div>
-    
+
     <!-- Grade do Calendário -->
     <div class="calendar" id="calendar">
       <!-- A grade de dias será gerada via JavaScript -->
@@ -96,7 +110,7 @@
         <button type="submit">Adicionar Compromisso</button>
       </form>
     </div>
-    
+
     <!-- Seção fixa para exibir os compromissos do dia selecionado -->
     <div id="daily-appointments">
       <h2>Compromissos do Dia</h2>
@@ -144,6 +158,8 @@
     </div>
   </div>
 
+  <!-- Script principal (JS) -->
   <script src="firebase.js" defer type="module"></script>
 </body>
+
 </html>
