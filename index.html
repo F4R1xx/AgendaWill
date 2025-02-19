@@ -1,100 +1,92 @@
 <!DOCTYPE html>
 <html lang="pt">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Agenda de Compromissos - Calendário</title>
   <link rel="icon" type="image/png" href="icon.png">
-
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <!-- CSS Principal -->
   <link rel="stylesheet" href="estilo.css" />
-
   <!-- Firebase: App, Realtime Database e Auth (compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-
   <!-- SweetAlert2 para alertas bonitos -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-
 <body>
-  <!-- Área de Login (somente login; registro removido) -->
-  <div class="login-container" id="login-container">
-    <h2>Bem-vindo</h2>
-    <p>Entre para modificar a agenda</p>
-    <div class="form-group">
-      <input type="email" id="login-email" placeholder="Email" required>
+  <!-- Área de Login -->
+  <section class="login login--visible" id="login-container">
+    <h2 class="login__title">Bem-vindo</h2>
+    <p class="login__subtitle">Entre para modificar a agenda</p>
+    <div class="login__form-group">
+      <input type="email" id="login-email" class="login__input" placeholder="Email" required>
     </div>
-    <div class="form-group">
-      <input type="password" id="login-password" placeholder="Senha" required>
+    <div class="login__form-group">
+      <input type="password" id="login-password" class="login__input" placeholder="Senha" required>
     </div>
-    <div class="login-buttons">
-      <button id="login-btn">Entrar</button>
+    <div class="login__buttons">
+      <button id="login-btn" class="button button--primary">Entrar</button>
     </div>
-  </div>
+  </section>
 
   <!-- Conteúdo Principal -->
-  <div class="container">
-    <!-- Informações do usuário logado -->
-    <div class="user-info" id="user-info" style="display: none;">
-      <span id="user-email"></span>
-      <button id="logout-btn">Sair</button>
-    </div>
-
-    <!-- Busca Global -->
-    <div class="search-container">
-      <input
-        type="text"
-        id="global-search"
-        placeholder="Buscar compromissos por título, data ou hora..."
-        title="Buscar compromissos"
-      />
-    </div>
-    <!-- Seção para exibir resultados da busca global -->
-    <div id="global-search-results"></div>
-
-    <h1>Agenda de Compromissos</h1>
-
-    <!-- Controles de Navegação do Calendário -->
-    <div class="calendar-nav">
-      <div class="year-nav">
-        <button id="prev-year">&laquo; Ano Anterior</button>
-        <button id="today-btn">Hoje</button>
-        <button id="next-year">Próximo Ano &raquo;</button>
+  <main class="container">
+    <header class="header">
+      <div class="header__user-info" id="user-info" style="display: none;">
+        <span class="header__user-email" id="user-email"></span>
+        <button id="logout-btn" class="button button--warning">Sair</button>
       </div>
-      <div class="month-nav">
-        <button id="prev-month">&lsaquo; Mês Anterior</button>
-        <span id="month-year"></span>
-        <button id="next-month">Próximo Mês &rsaquo;</button>
+      <button id="theme-toggle" class="button button--toggle" aria-label="Alternar tema">
+        <span class="button__icon">🌙</span>
+      </button>
+    </header>
+
+    <section class="search">
+      <input type="text" id="global-search" class="search__input" placeholder="Buscar compromissos por título, data ou hora..." title="Buscar compromissos">
+      <div id="global-search-results" class="search__results"></div>
+    </section>
+
+    <h1 class="title">Agenda de Compromissos</h1>
+
+    <nav class="calendar-nav">
+      <div class="calendar-nav__year">
+        <button id="prev-year" class="button button--secondary" aria-label="Ano Anterior">&laquo; Ano Anterior</button>
+        <button id="today-btn" class="button button--secondary" aria-label="Hoje">Hoje</button>
+        <button id="next-year" class="button button--secondary" aria-label="Próximo Ano">Próximo Ano &raquo;</button>
       </div>
-    </div>
+      <div class="calendar-nav__month">
+        <button id="prev-month" class="button button--secondary" aria-label="Mês Anterior">&lsaquo; Mês Anterior</button>
+        <span id="month-year" class="calendar-nav__month-display"></span>
+        <button id="next-month" class="button button--secondary" aria-label="Próximo Mês">Próximo Mês &rsaquo;</button>
+      </div>
+    </nav>
 
-    <!-- Grade do Calendário -->
-    <div class="calendar" id="calendar">
-      <!-- A grade de dias será gerada via JavaScript -->
-    </div>
+    <section class="calendar" id="calendar" aria-label="Calendário">
+      <!-- A grade do calendário será gerada via JavaScript -->
+    </section>
 
-    <!-- Seção de Adição de Compromissos (somente para usuários logados) -->
-    <div id="appointment-section">
-      <h2>Adicionar Compromisso</h2>
-      <form id="appointment-form">
-        <div class="form-group">
-          <input type="text" id="title" placeholder="Título" required>
+    <section class="appointment" id="appointment-section">
+      <h2 class="appointment__title">Adicionar Compromisso</h2>
+      <form id="appointment-form" class="appointment__form">
+        <div class="appointment__form-group">
+          <input type="text" id="title" class="appointment__input" placeholder="Título" required>
         </div>
-        <div class="form-group">
-          <input type="date" id="date" required>
+        <div class="appointment__form-group">
+          <input type="date" id="date" class="appointment__input" required>
         </div>
-        <div class="form-group">
-          <input type="time" id="time" required>
+        <div class="appointment__form-group">
+          <input type="time" id="time" class="appointment__input" required>
         </div>
-        <div class="form-group">
-          <textarea id="description" rows="3" placeholder="Descrição"></textarea>
+        <div class="appointment__form-group">
+          <textarea id="description" class="appointment__input" rows="3" placeholder="Descrição"></textarea>
         </div>
-        <!-- Seleção de cor pré-definida (até 10 opções) -->
-        <div class="form-group">
-          <select id="color">
+        <div class="appointment__form-group">
+          <select id="color" class="appointment__select">
             <option value="#007BFF">Azul Padrão</option>
             <option value="#FF5733">Laranja</option>
             <option value="#FFC300">Amarelo</option>
@@ -107,40 +99,35 @@
             <option value="#fd7e14">Laranja Escuro</option>
           </select>
         </div>
-        <button type="submit">Adicionar Compromisso</button>
+        <button type="submit" class="button button--secondary">Adicionar Compromisso</button>
       </form>
-    </div>
+    </section>
 
-    <!-- Seção fixa para exibir os compromissos do dia selecionado -->
-    <div id="daily-appointments">
-      <h2>Compromissos do Dia</h2>
-      <ul id="daily-appointments-list"></ul>
-    </div>
-  </div>
+    <section class="daily-appointments" id="daily-appointments">
+      <h2 class="daily-appointments__title">Compromissos do Dia</h2>
+      <ul id="daily-appointments-list" class="daily-appointments__list"></ul>
+    </section>
+  </main>
 
-  <!-- Modal para Exibir os Compromissos de um Dia (para adição via modal) -->
-  <div id="modal" class="modal">
-    <div class="modal-content">
-      <span id="close-modal" class="close">&times;</span>
-      <h3>Compromissos em <span id="modal-date"></span></h3>
-      <ul id="modal-appointments"></ul>
-
-      <!-- Botão para Exibir/Esconder o Formulário de Adição dentro do Modal -->
-      <button id="modal-add-btn" class="modal-add-btn">Adicionar Compromisso neste Dia</button>
-
-      <!-- Formulário Interno do Modal (inicia oculto) -->
-      <div id="modal-appointment-form" style="display: none; margin-top: 15px;">
-        <div class="form-group">
-          <input type="text" id="modal-title" placeholder="Título" required>
+  <!-- Modal para compromissos do dia -->
+  <div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-date">
+    <div class="modal__content">
+      <button id="close-modal" class="modal__close" aria-label="Fechar Modal">&times;</button>
+      <h3 class="modal__title">Compromissos em <span id="modal-date"></span></h3>
+      <ul id="modal-appointments" class="modal__appointments"></ul>
+      <button id="modal-add-btn" class="button button--primary modal__add-btn">Adicionar Compromisso neste Dia</button>
+      <div id="modal-appointment-form" class="modal__form" style="display: none;">
+        <div class="modal__form-group">
+          <input type="text" id="modal-title" class="modal__input" placeholder="Título" required>
         </div>
-        <div class="form-group">
-          <input type="time" id="modal-time" required>
+        <div class="modal__form-group">
+          <input type="time" id="modal-time" class="modal__input" required>
         </div>
-        <div class="form-group">
-          <textarea id="modal-description" rows="2" placeholder="Descrição"></textarea>
+        <div class="modal__form-group">
+          <textarea id="modal-description" class="modal__input" rows="2" placeholder="Descrição"></textarea>
         </div>
-        <div class="form-group">
-          <select id="modal-color">
+        <div class="modal__form-group">
+          <select id="modal-color" class="modal__select">
             <option value="#007BFF">Azul Padrão</option>
             <option value="#FF5733">Laranja</option>
             <option value="#FFC300">Amarelo</option>
@@ -153,13 +140,21 @@
             <option value="#fd7e14">Laranja Escuro</option>
           </select>
         </div>
-        <button id="modal-save-btn">Salvar Compromisso</button>
+        <button id="modal-save-btn" class="button button--secondary">Salvar Compromisso</button>
       </div>
     </div>
   </div>
 
   <!-- Script principal (JS) -->
   <script src="firebase.js" defer type="module"></script>
+  <!-- Script para Dark/Light Mode -->
+  <script>
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    themeToggleBtn.addEventListener('click', () => {
+      document.body.classList.toggle('dark-theme');
+      const iconSpan = themeToggleBtn.querySelector('.button__icon');
+      iconSpan.textContent = document.body.classList.contains('dark-theme') ? '☀️' : '🌙';
+    });
+  </script>
 </body>
-
 </html>

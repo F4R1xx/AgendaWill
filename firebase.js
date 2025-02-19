@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
-  // ====================== CONFIGURAR FIREBASE AQUI ======================
+  /* ====================== CONFIGURAR FIREBASE AQUI ====================== */
   const firebaseConfig = {
     apiKey: "AIzaSyD1wDTxzjweuWdJEiM_CsFtrcIWLsR6uzI",
     authDomain: "agenda-f3586.firebaseapp.com",
@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", function () {
     messagingSenderId: "387929971337",
     appId: "1:387929971337:web:d0f27500d3a1b4553e0458"
   };
-  // ======================================================================
+  /* ====================================================================== */
 
   // Inicializa o Firebase
   firebase.initializeApp(firebaseConfig);
@@ -16,16 +16,14 @@ document.addEventListener("DOMContentLoaded", function () {
   const appointmentsRef = database.ref("appointments");
   const auth = firebase.auth();
 
-  // Estado do calendário e dos compromissos
+  // Estado do calendário e compromissos
   let currentDate = new Date();
   let currentMonth = currentDate.getMonth();
   let currentYear = currentDate.getFullYear();
   let appointments = [];
-
-  // Para exibição dos compromissos do dia selecionado
   let selectedDate = formatDate(new Date());
 
-  // Elementos de Login/Registro e Usuário
+  // Elementos DOM
   const loginContainer = document.getElementById("login-container");
   const loginEmail = document.getElementById("login-email");
   const loginPassword = document.getElementById("login-password");
@@ -35,25 +33,19 @@ document.addEventListener("DOMContentLoaded", function () {
   const logoutBtn = document.getElementById("logout-btn");
   const appointmentSection = document.getElementById("appointment-section");
   const modalAddBtn = document.getElementById("modal-add-btn");
-
-  // Elemento para a lista fixa de compromissos do dia
   const dailyAppointmentsList = document.getElementById("daily-appointments-list");
-
-  // Elementos para a busca global
   const globalSearchInput = document.getElementById("global-search");
   const globalSearchResults = document.getElementById("global-search-results");
 
-  // Monitorar mudanças no estado de autenticação
+  /* -------- Monitorar mudanças na autenticação -------- */
   auth.onAuthStateChanged(user => {
     if (user) {
-      // Usuário logado: oculta área de login e exibe opções de modificação
       loginContainer.style.display = "none";
       userInfo.style.display = "flex";
       userEmailDisplay.textContent = user.email;
       appointmentSection.style.display = "block";
       modalAddBtn.style.display = "block";
     } else {
-      // Usuário não logado: exibe somente o calendário e compromissos
       loginContainer.style.display = "block";
       userInfo.style.display = "none";
       appointmentSection.style.display = "none";
@@ -61,8 +53,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Evento de Login (registro removido)
-  loginBtn.addEventListener("click", function () {
+  /* -------- Login -------- */
+  loginBtn.addEventListener("click", () => {
     const email = loginEmail.value;
     const password = loginPassword.value;
     auth.signInWithEmailAndPassword(email, password)
@@ -83,8 +75,8 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   });
 
-  // Evento de Logout
-  logoutBtn.addEventListener("click", function () {
+  /* -------- Logout -------- */
+  logoutBtn.addEventListener("click", () => {
     auth.signOut().then(() => {
       Swal.fire({
         icon: 'success',
@@ -95,55 +87,54 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // Sincroniza compromissos do Firebase (child_added)
-  appointmentsRef.on("child_added", function (data) {
+  /* -------- Sincronização de Compromissos -------- */
+  appointmentsRef.on("child_added", data => {
     const appointment = data.val();
     appointment.id = data.key;
     appointments.push(appointment);
 
-    // Se o compromisso for do mês atual, atualiza o calendário
     const appDate = new Date(appointment.date);
     if (appDate.getFullYear() === currentYear && appDate.getMonth() === currentMonth) {
       generateCalendar(currentMonth, currentYear);
     }
-
-    // Se o compromisso for do dia selecionado, atualiza a lista fixa
     if (appointment.date === selectedDate) {
       displayDayAppointments(selectedDate);
     }
   });
 
-  // Listener para alteração de compromissos (edição)
-  appointmentsRef.on("child_changed", function (data) {
+  appointmentsRef.on("child_changed", data => {
     const changedId = data.key;
     const updatedAppointment = data.val();
     updatedAppointment.id = data.key;
-
-    // Atualiza o array local
     appointments = appointments.map(app => (app.id === changedId ? updatedAppointment : app));
     generateCalendar(currentMonth, currentYear);
     displayDayAppointments(selectedDate);
   });
 
-  // Listener para remoção de compromissos
-  appointmentsRef.on("child_removed", function (data) {
+  appointmentsRef.on("child_removed", data => {
     const removedId = data.key;
     appointments = appointments.filter(app => app.id !== removedId);
     generateCalendar(currentMonth, currentYear);
     displayDayAppointments(selectedDate);
   });
 
-  // Gera o calendário inicial
   generateCalendar(currentMonth, currentYear);
-  // Exibe os compromissos do dia padrão (hoje)
   displayDayAppointments(selectedDate);
 
-  // Função para gerar o calendário completo
+  /* -------- Funções Auxiliares -------- */
+  function formatDate(date) {
+    let d = date.getDate();
+    let m = date.getMonth() + 1;
+    const y = date.getFullYear();
+    if (d < 10) d = "0" + d;
+    if (m < 10) m = "0" + m;
+    return `${y}-${m}-${d}`;
+  }
+
   function generateCalendar(month, year) {
     const calendar = document.getElementById("calendar");
     calendar.innerHTML = "";
     const daysOfWeek = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-
     daysOfWeek.forEach(day => {
       const header = document.createElement("div");
       header.classList.add("day-header");
@@ -151,11 +142,10 @@ document.addEventListener("DOMContentLoaded", function () {
       calendar.appendChild(header);
     });
 
-    const firstDayOfGrid = new Date(year, month, 1);
+    let firstDayOfGrid = new Date(year, month, 1);
     const firstDayWeekday = firstDayOfGrid.getDay();
     firstDayOfGrid.setDate(firstDayOfGrid.getDate() - firstDayWeekday);
 
-    // Data real (hoje) para comparação – sem horas
     const realToday = new Date();
     realToday.setHours(0, 0, 0, 0);
 
@@ -169,31 +159,24 @@ document.addEventListener("DOMContentLoaded", function () {
       dayCell.dataset.date = dayStr;
 
       if (dayDate.getMonth() === month && dayDate.getFullYear() === year) {
-        dayCell.classList.add("active-month-day");
-      } else {
-        dayCell.classList.add("other-month-day");
+        dayCell.classList.add("day--active");
       }
 
-      // Define classes para o dia de hoje e dias passados
       const cellDate = new Date(dayDate);
       cellDate.setHours(0, 0, 0, 0);
-
       if (cellDate.getTime() === realToday.getTime()) {
-        dayCell.classList.add("today");
-        // Define o dia selecionado (default: hoje)
+        dayCell.classList.add("day--today");
         selectedDate = dayStr;
         displayDayAppointments(selectedDate);
       } else if (cellDate.getTime() < realToday.getTime()) {
-        dayCell.classList.add("past");
+        dayCell.style.opacity = "0.6";
       }
 
-      // Número do dia
       const dayNumber = document.createElement("div");
-      dayNumber.classList.add("day-number");
+      dayNumber.classList.add("day__number");
       dayNumber.innerText = dayDate.getDate();
       dayCell.appendChild(dayNumber);
 
-      // Exibe pontinhos para cada compromisso no dia
       const dayAppointments = appointments.filter(app => app.date === dayStr);
       dayAppointments.forEach(app => {
         const dot = document.createElement("span");
@@ -202,7 +185,6 @@ document.addEventListener("DOMContentLoaded", function () {
         dayCell.appendChild(dot);
       });
 
-      // Ao clicar, abre o modal e atualiza a lista fixa de compromissos
       dayCell.addEventListener("click", () => {
         selectedDate = dayStr;
         displayDayAppointments(selectedDate);
@@ -220,24 +202,9 @@ document.addEventListener("DOMContentLoaded", function () {
     monthYearSpan.innerText = `${monthNames[month]} de ${year}`;
   }
 
-  // Formata a data no formato YYYY-MM-DD
-  function formatDate(date) {
-    let d = date.getDate();
-    let m = date.getMonth() + 1;
-    const y = date.getFullYear();
-    if (d < 10) d = "0" + d;
-    if (m < 10) m = "0" + m;
-    return `${y}-${m}-${d}`;
-  }
-
-  // Exibe a lista fixa de compromissos do dia selecionado
-  // com filtro (busca interna) e botões de editar/excluir
   function displayDayAppointments(dateStr) {
     dailyAppointmentsList.innerHTML = "";
-
-    // Filtra compromissos do dia
-    let dayApps = appointments.filter(app => app.date === dateStr);
-
+    const dayApps = appointments.filter(app => app.date === dateStr);
     if (dayApps.length === 0) {
       const li = document.createElement("li");
       li.innerText = "Nenhum compromisso para este dia.";
@@ -246,7 +213,6 @@ document.addEventListener("DOMContentLoaded", function () {
       dayApps.forEach(app => {
         const li = document.createElement("li");
         li.dataset.appointmentId = app.id;
-
         li.innerHTML = `
           <div class="appointment-item">
             <span class="color-marker" style="background-color: ${app.color};"></span>
@@ -257,9 +223,7 @@ document.addEventListener("DOMContentLoaded", function () {
             </div>
           </div>
         `;
-
         if (auth.currentUser) {
-          // Botão de edição
           const editBtn = document.createElement("button");
           editBtn.classList.add("edit-btn");
           editBtn.title = "Editar compromisso";
@@ -269,36 +233,31 @@ document.addEventListener("DOMContentLoaded", function () {
             inlineEditAppointment(app, li);
           });
 
-          // Botão de deleção
           const deleteBtn = document.createElement("button");
           deleteBtn.classList.add("delete-btn");
           deleteBtn.title = "Remover compromisso";
           deleteBtn.innerHTML = "🗑️";
           deleteBtn.addEventListener("click", (e) => {
             e.stopPropagation();
-            li.classList.add("fade-out"); // Animação fade-out
+            li.classList.add("fade-out");
             setTimeout(() => {
               deleteAppointment(app.id);
             }, 500);
           });
 
-          // Anexa os botões de edição e deleção
           li.querySelector(".appointment-item").appendChild(editBtn);
           li.querySelector(".appointment-item").appendChild(deleteBtn);
         }
-
         dailyAppointmentsList.appendChild(li);
       });
     }
   }
 
-  // Edição inline de um compromisso
   function inlineEditAppointment(app, liElement) {
     liElement.innerHTML = "";
     const form = document.createElement("form");
     form.classList.add("inline-edit-form");
 
-    // Input para título
     const titleInput = document.createElement("input");
     titleInput.type = "text";
     titleInput.value = app.title;
@@ -306,21 +265,18 @@ document.addEventListener("DOMContentLoaded", function () {
     titleInput.placeholder = "Título";
     form.appendChild(titleInput);
 
-    // Input para hora
     const timeInput = document.createElement("input");
     timeInput.type = "time";
     timeInput.value = app.time;
     timeInput.required = true;
     form.appendChild(timeInput);
 
-    // Textarea para descrição
     const descInput = document.createElement("textarea");
     descInput.rows = 2;
     descInput.placeholder = "Descrição";
     descInput.value = app.description || "";
     form.appendChild(descInput);
 
-    // Select para cor
     const colorSelect = document.createElement("select");
     const colors = [
       { value: "#007BFF", label: "Azul Padrão" },
@@ -345,20 +301,17 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     form.appendChild(colorSelect);
 
-    // Botão Salvar
     const saveBtn = document.createElement("button");
     saveBtn.type = "submit";
     saveBtn.innerText = "Salvar";
     form.appendChild(saveBtn);
 
-    // Botão Cancelar
     const cancelBtn = document.createElement("button");
     cancelBtn.type = "button";
     cancelBtn.innerText = "Cancelar";
     cancelBtn.style.marginLeft = "10px";
     form.appendChild(cancelBtn);
 
-    // Ao submeter, atualiza no Firebase
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       const updatedData = {
@@ -366,10 +319,10 @@ document.addEventListener("DOMContentLoaded", function () {
         time: timeInput.value,
         description: descInput.value,
         color: colorSelect.value,
-        date: app.date,      // Mantém a data original
+        date: app.date,
         createdAt: app.createdAt
       };
-      appointmentsRef.child(app.id).update(updatedData, function (error) {
+      appointmentsRef.child(app.id).update(updatedData, error => {
         if (error) {
           Swal.fire({
             icon: 'error',
@@ -388,7 +341,6 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     });
 
-    // Ao cancelar, restaura a exibição normal
     cancelBtn.addEventListener("click", () => {
       displayDayAppointments(selectedDate);
     });
@@ -396,7 +348,6 @@ document.addEventListener("DOMContentLoaded", function () {
     liElement.appendChild(form);
   }
 
-  // Remove um compromisso com confirmação
   function deleteAppointment(appointmentId) {
     if (!auth.currentUser) {
       Swal.fire({
@@ -432,20 +383,18 @@ document.addEventListener("DOMContentLoaded", function () {
             });
           });
       } else {
-        // Se o usuário cancelar, remove o efeito fade-out
         const li = document.querySelector(`li[data-appointment-id="${appointmentId}"]`);
         if (li) li.classList.remove("fade-out");
       }
     });
   }
 
-  // Abre o modal com os compromissos do dia
   function openModal(dateStr) {
     const modal = document.getElementById("modal");
     const modalDateSpan = document.getElementById("modal-date");
     modalDateSpan.innerText = dateStr;
     loadModalAppointments(dateStr);
-    modal.style.display = "block";
+    modal.style.display = "flex";
 
     const modalAddBtn = document.getElementById("modal-add-btn");
     const modalAppointmentForm = document.getElementById("modal-appointment-form");
@@ -459,9 +408,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     modalAddBtn.onclick = () => {
-      modalAppointmentForm.style.display = (modalAppointmentForm.style.display === "none")
-        ? "block"
-        : "none";
+      modalAppointmentForm.style.display = (modalAppointmentForm.style.display === "none" || modalAppointmentForm.style.display === "") ? "block" : "none";
     };
 
     modalSaveBtn.onclick = () => {
@@ -486,7 +433,7 @@ document.addEventListener("DOMContentLoaded", function () {
         color,
         createdAt: new Date().toISOString()
       };
-      appointmentsRef.push(newAppointment, function (error) {
+      appointmentsRef.push(newAppointment, error => {
         if (error) {
           Swal.fire({
             icon: 'error',
@@ -494,7 +441,6 @@ document.addEventListener("DOMContentLoaded", function () {
             text: 'Erro ao adicionar compromisso: ' + error
           });
         } else {
-          // Limpa formulário do modal
           document.getElementById("modal-title").value = "";
           document.getElementById("modal-time").value = "";
           document.getElementById("modal-description").value = "";
@@ -516,12 +462,10 @@ document.addEventListener("DOMContentLoaded", function () {
     };
   }
 
-  // Carrega os compromissos no modal (lista interna)
   function loadModalAppointments(dateStr) {
     const modalAppointmentsList = document.getElementById("modal-appointments");
     modalAppointmentsList.innerHTML = "";
     const dayApps = appointments.filter(app => app.date === dateStr);
-
     if (dayApps.length === 0) {
       const li = document.createElement("li");
       li.innerText = "Nenhum compromisso para este dia.";
@@ -540,7 +484,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // Fechar o modal ao clicar no "X" ou fora do conteúdo
   document.getElementById("close-modal").addEventListener("click", () => {
     document.getElementById("modal").style.display = "none";
   });
@@ -550,7 +493,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Navegação do Calendário
+  /* -------- Navegação do Calendário -------- */
   document.getElementById("prev-month").addEventListener("click", () => {
     currentMonth--;
     if (currentMonth < 0) {
@@ -588,9 +531,9 @@ document.addEventListener("DOMContentLoaded", function () {
     displayDayAppointments(selectedDate);
   });
 
-  // Formulário principal para adicionar compromisso (somente para usuários logados)
+  /* -------- Formulário Principal de Compromissos -------- */
   const form = document.getElementById("appointment-form");
-  form.addEventListener("submit", function (e) {
+  form.addEventListener("submit", e => {
     e.preventDefault();
     if (!auth.currentUser) {
       Swal.fire({
@@ -622,7 +565,7 @@ document.addEventListener("DOMContentLoaded", function () {
       color,
       createdAt: new Date().toISOString()
     };
-    appointmentsRef.push(newAppointment, function (error) {
+    appointmentsRef.push(newAppointment, error => {
       if (error) {
         Swal.fire({
           icon: 'error',
@@ -637,7 +580,6 @@ document.addEventListener("DOMContentLoaded", function () {
           showConfirmButton: false,
           timer: 1500
         });
-        // Se o compromisso for do dia selecionado, atualiza a lista
         const appDate = new Date(date);
         if (formatDate(appDate) === selectedDate) {
           generateCalendar(currentMonth, currentYear);
@@ -647,17 +589,13 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // Busca global: atualiza os resultados conforme o usuário digita
+  /* -------- Busca Global -------- */
   globalSearchInput.addEventListener("input", () => {
     const term = globalSearchInput.value.trim().toLowerCase();
-
-    // Se a busca estiver vazia, exibimos nenhum resultado:
     if (!term) {
       renderGlobalSearchResults([]);
       return;
     }
-
-    // Filtra os compromissos:
     const filteredAppointments = appointments.filter(app =>
       app.title.toLowerCase().includes(term) ||
       app.date.includes(term) ||
@@ -666,7 +604,6 @@ document.addEventListener("DOMContentLoaded", function () {
     renderGlobalSearchResults(filteredAppointments);
   });
 
-  // Exibe os resultados da busca global
   function renderGlobalSearchResults(results) {
     globalSearchResults.innerHTML = "";
     if (results.length === 0) {
@@ -674,35 +611,25 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
     results.forEach(app => {
-      // Cria o card para cada compromisso
       const card = document.createElement("div");
       card.classList.add("search-result-card");
-
       card.innerHTML = `
         <h3>${app.title}</h3>
         <p><strong>Data:</strong> ${app.date}</p>
         <p><strong>Hora:</strong> ${app.time}</p>
         <p>${app.description || ""}</p>
       `;
-
-      // Cria o botão "Mostrar Compromisso"
       const btn = document.createElement("button");
-      btn.classList.add("show-appointment-btn");
+      btn.classList.add("button", "button--secondary", "show-appointment-btn");
       btn.innerText = "Mostrar Compromisso";
       btn.addEventListener("click", () => {
-        // Converte a data do compromisso para objeto Date
         const appointmentDate = new Date(app.date);
-        // Atualiza o mês e o ano atuais de acordo com o compromisso
         currentMonth = appointmentDate.getMonth();
         currentYear = appointmentDate.getFullYear();
-        // Gera o calendário para o mês/ano corretos
         generateCalendar(currentMonth, currentYear);
-        // Seleciona o dia do compromisso e exibe os compromissos daquele dia
         selectedDate = app.date;
         displayDayAppointments(app.date);
-        // Rola a visualização para o calendário
         document.getElementById("calendar").scrollIntoView({ behavior: "smooth" });
-        // Destaca o dia do compromisso
         const dayCell = document.querySelector(`.day[data-date="${app.date}"]`);
         if (dayCell) {
           dayCell.classList.add("highlight-day");
@@ -712,7 +639,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       });
       card.appendChild(btn);
-
       globalSearchResults.appendChild(card);
     });
   }
